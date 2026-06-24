@@ -1,0 +1,62 @@
+#!/usr/bin/env python3
+# -*- coding: utf-8 -*-
+
+from Jenga import *
+
+with project("MoteurRenduVK"):
+    windowedapp()
+    language("C++")
+    cppdialect("C++20")
+    location(".")
+
+    _TC_WINDOWS = "nk-windows-clang-mingw"
+    usetoolchain(_TC_WINDOWS)
+
+    files([
+        "engine/**.cpp", "main.cpp"
+    ])
+
+    includedirs([
+        "engine", "shaders",
+        "%{wks.location}/Externals/Libs/Nkentseu/include",
+        "C:/VulkanSDK/1.4.341.0/Include",
+    ])
+    
+    links([
+        "NKPlatform", "NKCore", "NKMemory", "NKContainers", "NKMath",   # foundation
+        "NKTime", "NKLogger", "NKThreading",                            # system
+        "NKEvent", "NKWindow", "NKContext",
+        "vulkan-1",                             # Runtime
+    ])
+
+    libdirs([
+        "%{wks.location}/Externals/Libs/Nkentseu/lib",
+        "C:/VulkanSDK/1.4.341.0/Lib",
+    ])
+
+    objdir("%{wks.location}/Build/Obj/%{cfg.buildcfg}-%{cfg.system}/%{prj.name}")
+    targetdir("%{wks.location}/Build/Bin/%{cfg.buildcfg}-%{cfg.system}/%{prj.name}")
+
+    # ===== Windows ================================================================
+    with filter("system:Windows"):
+        defines([
+            "WIN32_LEAN_AND_MEAN",
+            "_UNICODE", "UNICODE",
+        ])
+
+        links([
+            "user32", "gdi32", "opengl32", "dwmapi", "shell32",
+            "xinput", "mf", "mfplat", "mfreadwrite", "mfuuid",
+            "uuid", "ole32", "dinput8", "dxguid",
+            "d3d11", "d3d12", "dxgi", "d3dcompiler"
+        ])
+    # ===== Linux ================================================================
+    with filter('system:Linux'): 
+            links(['X11', 'pthread']) 
+            defines(['NKENTSEU_PLATFORM_LINUX']) 
+    # ===== Mac ================================================================
+    with filter('system:macOS'): 
+            framework('Cocoa') 
+            defines(['NKENTSEU_PLATFORM_MACOS'])
+
+    
